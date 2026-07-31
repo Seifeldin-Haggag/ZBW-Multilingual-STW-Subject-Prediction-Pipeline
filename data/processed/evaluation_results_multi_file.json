@@ -1,0 +1,8 @@
+{
+    "evaluation_threshold": 0.45,
+    "f1_score": 0.6301937206940235,
+    "precision": 0.6916017018216651,
+    "recall": 0.5869899583874999,
+    "strict_accuracy": 0.38370356093094976,
+    "relaxed_accuracy": 0.7732857900062642
+}
