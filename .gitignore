@@ -1,5 +1,4 @@
-# Skip heavy binaries and raw large TSV/checkpoint dumps
-*.tsv
+# Skip heavy training weights and intermediate checkpoints
 *.pt
 *.safetensors
 *.bin
