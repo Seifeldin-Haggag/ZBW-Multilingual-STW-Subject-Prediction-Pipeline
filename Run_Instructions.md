@@ -1,99 +1,120 @@
-# RoBERTa Fine-Tuning for Multi-Label Subject Classification
+#  Step-by-Step Pipeline Run Instructions
 
-## Objective
-
-Given an academic abstract, predict which subjects (e.g., "Machine Learning", "Energy", "Economics") it belongs to.
+This guide provides the exact terminal command sequence to run the entire project pipeline from scratch—from raw data filtering to dynamic model training and interactive inference.
 
 ---
 
-### 1. 🔄 Preprocess Dataset
+##  Prerequisites & Setup
 
-**Script:** `src/preprocessing.py`
+1. **Open your Terminal** and navigate to the project root directory:
+   ```bash
+   cd /Users/seifhany/Desktop/ZBW_multilingual_stw_nlp/zbw_proj_v05/multilingual-stw-nlp-main
 
-* Loads raw data `english_stw_filtered.json`
-* Extracts abstracts and subject labels
-* Encodes labels with `MultiLabelBinarizer`
-* Splits data into `train.json`, `val.json` and `test.json`
-
-**Run:**
-
-```bash
-python3 src/preprocessing.py
 ```
----
 
-### 3. Fine-Tune RoBERTa
-
-**Script:** `src/train_roberta_filtered.py`
-
-* Loads `train.json` and `val.json`
-* Filters to top 50 most frequent labels
-* Uses weighted `BCEWithLogitsLoss` to combat class imbalance
-* Fine-tunes full RoBERTa model
-* Saves model + tokenizer to `roberta_trained_model/`
-
-**Run:**
-
+2. **Install Python Dependencies:**
 ```bash
-python3 src/train_roberta_filtered.py
+pip install -r requirements.txt
+
 ```
+
+
 
 ---
 
-### 4. Evaluate Model
+##  Step 1: Vocabulary Intersection Filtering
 
-**Script:** `src/evaluate_threshold.py`
-
-* Loads fine-tuned model + tokenizer
-* Evaluates predictions on `val.json`
-* Computes F1/Precision/Recall across thresholds 0.2–0.8
-
-**Run:**
+Intersects your raw JSON dataset (`data/raw/econbiz_stw.json`) against the official STW English reference vocabulary (`data/raw/stw-en.tsv`) to remove invalid tags:
 
 ```bash
-python3 src/evaluate_threshold.py
+python src/filters/filter_english_stw.py
+
+```
+
+* **Output generated:** `data/filtered/english_stw_filtered.json`
+
+---
+
+##  Step 2: Full-Vocabulary Preprocessing & Encoding
+
+Extracts all target subject labels across the entire dataset (including geographical concepts like Germany, USA, world, etc.), fits the `MultiLabelBinarizer` across the full vocabulary space, and builds an 80/20 train/validation split:
+
+```bash
+python src/data_preparation/preprocessing.py
+
+```
+
+* **Outputs generated:**
+* `data/processed/train.json`
+* `data/processed/val.json`
+* `data/processed/label_encoder.pkl`
+
+
+
+---
+
+##  Step 3: Model Fine-Tuning (Universal Execution)
+
+Run training using the dynamic Focal Loss engine. The framework automatically adapts to any open-source model available on Hugging Face:
+
+### Option A: Train Default Multilingual Baseline (XLM-RoBERTa)
+
+```bash
+python src/models/train.py
+
+```
+
+### Option B: Train English RoBERTa Baseline
+
+```bash
+python src/models/train.py --model_id roberta-base
+
+```
+
+### Option C: Fine-Tune Large Language Models (Qwen 2.5 / LLaMA 3.2)
+
+```bash
+# Fine-tune Qwen 2.5 (1.5B Parameter LLM)
+python src/models/train.py --model_id Qwen/Qwen2.5-1.5B
+
+# Fine-tune LLaMA 3.2 (3B Parameter LLM)
+python src/models/train.py --model_id meta-llama/Llama-3.2-3B
+
+```
+
+* **Outputs generated:** Checkpoints, final model weights, and tokenizers are saved under `data/processed/trained_model_<model_name>/`.
+
+---
+
+##  Step 4: Decision Threshold Tuning & Evaluation
+
+Evaluate model predictions on validation data and determine the optimal probability threshold (e.g., $T = 0.40$ vs. $T = 0.50$) across Macro F1, Precision, and Recall:
+
+```bash
+python src/evaluation/evaluate_threshold.py
+
 ```
 
 ---
 
-## Custom Trainer
+##  Step 5: Interactive Terminal Inference
 
-**File:** `train_roberta_filtered.py`
-
-* Subclasses Hugging Face `Trainer`
-* Uses `pos_weight` with `BCEWithLogitsLoss` for rare label handling
-
----
-
-## Setup & Installation
-
-### 1. Create and activate virtual environment
+Run real-time subject predictions on custom economic abstracts directly in your console:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+python src/inference/interactive_inference.py
 
-### 2. Install dependencies
-
-```bash
-pip3 install -r requirements.txt
-```
-
-If `skmultilearn` fails:
-
-```bash
-pip3 install git+https://github.com/scikit-multilearn/scikit-multilearn.git
 ```
 
 ---
 
-## Full Pipeline Commands
+##  Quick Troubleshooting & Data Scaling Adjustments
 
-```bash
-source .venv/bin/activate
-python3 src/preprocessing.py
-python3 src/train_roberta_filtered.py
-python3 src/evaluate_threshold.py
+* **Debugging / Quick Experimentation:**
+Open `src/models/train.py` and set `TRAIN_SAMPLE_SIZE = 2000` to train quickly on a subset.
+* **Full Capacity / Production Mode:**
+Open `src/models/train.py` and set `TRAIN_SAMPLE_SIZE = None` to train on 100% of the dataset.
+
 ```
----
+
+```
