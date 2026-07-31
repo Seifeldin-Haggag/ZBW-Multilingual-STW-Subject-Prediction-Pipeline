@@ -1,13 +1,9 @@
-# Heavy raw datasets and exports
-data/raw/
-data/filtered/
+# Skip heavy binaries and raw large TSV/checkpoint dumps
 *.tsv
-
-# Trained model weights & saved PyTorch tensors
-data/processed/*.pt
-data/processed/xlm_roberta_trained_model/
-
-# Python environment & cache files
+*.pt
+*.safetensors
+*.bin
+checkpoint-*/
 __pycache__/
 *.pyc
 .DS_Store

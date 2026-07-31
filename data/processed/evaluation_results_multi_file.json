@@ -1,8 +1,3 @@
-{
-    "evaluation_threshold": 0.45,
-    "f1_score": 0.6301937206940235,
-    "precision": 0.6916017018216651,
-    "recall": 0.5869899583874999,
-    "strict_accuracy": 0.38370356093094976,
-    "relaxed_accuracy": 0.7732857900062642
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:bdcbc888f53db7cad405b8094cc35d8b5599c6599f7e3cf58fed51840023e592
+size 238
