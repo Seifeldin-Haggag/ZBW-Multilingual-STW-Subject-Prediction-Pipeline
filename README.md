@@ -1,19 +1,13 @@
-Here is an expanded, production-ready **`README.md`** file that incorporates your entire repository structure, your custom Focal Loss setup, execution steps, and a dedicated **Advanced Architecture Modifications** section.
 
-This new section explicitly details how to swap to LLMs, remove the 100-label cap for unlimited classes, and adjust data frequency/diet controls to maximize performance across your entire vocabulary.
-
----
-
-```markdown
-#  ZBW Multilingual STW Subject Prediction Pipeline
+#  ZBW Multilingual STW Subject Prediction & Universal Model Framework
 
 An end-to-end, data-centric deep learning repository for automated multi-label subject indexing of economic abstracts against the **Standard Thesaurus for Economics (STW)** vocabulary.
 
-This repository features baseline models (**XLM-RoBERTa** and **English RoBERTa**) enhanced with custom **Multi-Label Focal Loss** to combat severe class imbalance. The project is structured modularly, allowing seamless adaptation to fine-tuning generative **Large Language Models (LLMs)** such as **Qwen-2.5** or **LLaMA-3**.
+This repository features baseline models (**XLM-RoBERTa** and **English RoBERTa**) enhanced with custom **Multi-Label Focal Loss** to combat severe class imbalance. The architecture is fully modular, allowing you to dynamically fine-tune **ANY open-source language model on the internet** (such as **Qwen-2.5**, **LLaMA-3.2**, or **Mistral**) directly from Hugging Face via a single terminal command.
 
 ---
 
-## 📂 Repository Structure & Key Scripts
+##  Repository Structure & Key Scripts
 
 ```text
 multilingual-stw-nlp-main/
@@ -35,7 +29,7 @@ multilingual-stw-nlp-main/
 │   ├── data_preparation/
 │   │   ├── analyze_label_distribution.py # Class frequency inspection tool
 │   │   ├── data_analysis.py          # Data volume and length diagnostics
-│   │   └── preprocessing.py          # Noise filtering & Top-100 binarization
+│   │   └── preprocessing.py          # Noise filtering & vocabulary binarization
 │   ├── evaluation/
 │   │   ├── evaluate_multi_file.py    # Cross-dataset evaluation script
 │   │   └── evaluate_threshold.py     # Probability gate tuning (e.g., T = 0.40 / 0.50)
@@ -48,7 +42,7 @@ multilingual-stw-nlp-main/
 │   └── modeling_multilingual/
 │       ├── cross_validation/
 │       │   └── cross_validate.py     # K-Fold validation framework
-│       └── xlm_roberta_train_model.py# Primary XLM-RoBERTa training engine
+│       └── xlm_roberta_train_model.py# Primary training engine with dynamic model support
 ├── requirements.txt                  # Python dependency requirements
 ├── Run_Instructions.md               # Quick execution cheat sheet
 └── README.md                         # Primary project documentation
@@ -57,20 +51,20 @@ multilingual-stw-nlp-main/
 
 ---
 
-## Quickstart Pipeline Steps
+##  Quickstart Execution Pipeline
 
 ### 1. Data Preparation & Preprocessing
 
-Filter out noise terms, extract target STW subject classes, and generate the binarized `train.json`, `val.json`, and `label_encoder.pkl` files:
+Filter out noise terms, process vocabulary classes, and generate `train.json`, `val.json`, and `label_encoder.pkl`:
 
 ```bash
 python src/data_preparation/preprocessing.py
 
 ```
 
-### 2. Model Training
+### 2. Model Training (Default XLM-RoBERTa Baseline)
 
-Train the multilingual baseline using XLM-RoBERTa with custom Focal Loss:
+Train the default baseline using custom Multi-Label Focal Loss:
 
 ```bash
 python src/modeling_multilingual/xlm_roberta_train_model.py
@@ -79,48 +73,65 @@ python src/modeling_multilingual/xlm_roberta_train_model.py
 
 ### 3. Model Evaluation & Threshold Tuning
 
-Evaluate model performance across validation sets and discover optimal decision gates:
+Evaluate model performance and discover optimal decision gates:
 
 ```bash
 python src/evaluation/evaluate_threshold.py
 
 ```
 
-### 4. Interactive Inference
+---
 
-Test predictions interactively in your terminal:
+##  Dynamic Model Swapping: Training ANY Model from the Internet
 
+This repository is built with **Hugging Face `Auto` classes**, meaning you are not limited to XLM-RoBERTa. You can train **any open-source transformer model on Hugging Face** by passing its model ID flag during execution.
+
+### How to Run Any Hugging Face Model:
+
+* **Train on Qwen 2.5 (1.5B):**
 ```bash
-python src/inference/interactive_inference.py
+python src/modeling_multilingual/xlm_roberta_train_model.py --model_id Qwen/Qwen2.5-1.5B
 
 ```
 
+
+* **Train on LLaMA 3.2 (3B):**
+```bash
+python src/modeling_multilingual/xlm_roberta_train_model.py --model_id meta-llama/Llama-3.2-3B
+
+```
+
+
+* **Train on Mistral (7B):**
+```bash
+python src/modeling_multilingual/xlm_roberta_train_model.py --model_id mistralai/Mistral-7B-v0.1
+
+```
+
+
+
 ---
 
-## ⚡ Core Loss Engine: Multi-Label Focal Loss
+##  Core Loss Engine: Multi-Label Focal Loss
 
-To address extreme multi-label imbalance, the training engine overrides standard Binary Cross Entropy (BCE) with a **Multi-Label Focal Loss** implementation:
+To address extreme multi-label class imbalance, the training engine overrides standard Binary Cross Entropy (BCE) with a **Multi-Label Focal Loss** implementation:
 
 $$\text{Focal Loss} = - \alpha (1 - p_t)^\gamma \log(p_t)$$
 
-* **$\gamma = 2.0$ (Focusing Parameter):** Suppresses loss contributions from easily predicted negative classes, forcing gradients to update on difficult economic subject boundaries.
-* **$\alpha = 0.25$ (Alpha Balancing Factor):** Balances positive versus background class representations.
+* **$\gamma = 2.0$ (Focusing Parameter):** Suppresses loss contributions from easily predicted background negative classes, forcing gradients to update on hard-to-classify economic tags.
+* **$\alpha = 0.25$ (Alpha Balancing Factor):** Balances positive target classes against unlabelled space.
 
 ---
 
-##  Advanced Architecture Modifications & Optimization Guide
+##  Advanced Architecture Modifications
 
-To unlock the full potential of this pipeline—expanding beyond the 100-label baseline, removing data sampling limits ("data diet"), and changing model backbones—follow these technical modifications.
+### 1. Removing the 100-Label Cap (Unlocking Infinite STW Classes)
 
----
-
-### 1. Removing the 100-Label Cap (Unlocking All Classes / Infinite Tags)
-
-By default, `preprocessing.py` restricts training to the top 100 target categories. To allow the model to learn **all** categories present in your dataset (hundreds or thousands of STW classes):
+By default, `preprocessing.py` isolates the top 100 target categories. To train across the **entire dataset vocabulary** (hundreds or thousands of STW classes):
 
 #### A. Modify `src/data_preparation/preprocessing.py`
 
-Locate the label extraction section and replace the `.most_common(100)` limitation with full vocabulary extraction:
+Replace `.most_common(100)` with full vocabulary extraction:
 
 ```python
 # OLD (Restricted to Top 100):
@@ -135,14 +146,13 @@ mlb = MultiLabelBinarizer(classes=sorted(list(all_valid_names)))
 
 ```
 
-#### B. Dynamic MultiLabelBinarizer Initialization in `train.py`
+#### B. Dynamic Initialization in `train_model.py`
 
-In `xlm_roberta_train_model.py`, ensure the model initialization dynamically reads the vocabulary size directly from `label_encoder.pkl` rather than hardcoding a parameter:
+The training script automatically detects the updated label dimension from `label_encoder.pkl`:
 
 ```python
-# Automatically scales output neurons to match the size of mlb.classes_
-model = XLMRobertaForSequenceClassification.from_pretrained(
-    "xlm-roberta-base",
+model = AutoModelForSequenceClassification.from_pretrained(
+    MODEL_ID,
     num_labels=len(mlb.classes_), # Dynamically adjusts to 500, 1000, or unlimited classes
     problem_type="multi_label_classification"
 )
@@ -153,68 +163,16 @@ model = XLMRobertaForSequenceClassification.from_pretrained(
 
 ### 2. Adjusting Data Diet & Frequency Controls (Full Power Mode)
 
-The "data diet" controls the maximum instance cap per subject category to prevent dominant classes (e.g., *Germany*, *Monetary Policy*) from skewing model attention.
-
 To run the model at **full capacity** across the entire dataset without clipping data volume:
 
-#### A. Disable Instance Clipping in `preprocessing.py`
-
-If your script uses a hard cap counter (e.g., `MAX_SAMPLES_PER_TAG = 3000`), comment out or remove the cap logic:
-
-```python
-# FULL POWER MODE: Include all valid abstract samples
-final_texts = processed_texts
-final_labels = processed_labels
-
-```
-
-#### B. Scale Hyperparameters for Full-Scale Training
-
-When scaling up sequence volume and target classes, adjust hyperparameter bounds in `xlm_roberta_train_model.py`:
-
-* **Sequence Length (`MAX_LENGTH`):** Increase from `256` to `384` or `512` to capture complete academic abstract contexts.
-* **Batch Size & Gradient Accumulation:** If increasing sequence length causes GPU Out-Of-Memory (`OOM`) errors, reduce `BATCH_SIZE = 4` and set `gradient_accumulation_steps = 2` in `TrainingArguments`.
+* **Remove Sample Limits:** Ensure no maximum sample cap (e.g., `MAX_SAMPLES_PER_TAG`) is clipping instances in `preprocessing.py`.
+* **Increase Max Sequence Length:** In `xlm_roberta_train_model.py`, increase `MAX_LENGTH` from `256` to `384` or `512` to capture complete abstract contexts.
 
 ---
 
-### 3. Upgrading to Open-Source LLMs (Qwen / LLaMA / Unsloth)
+### 3. Parameter-Efficient Fine-Tuning (PEFT / LoRA for LLMs)
 
-To swap out `xlm-roberta-base` for modern generative LLMs (e.g., `Qwen/Qwen2.5-1.5B`, `Qwen/Qwen2.5-3B`, or `meta-llama/Llama-3.2-3B`):
-
-#### A. Update Imports in `xlm_roberta_train_model.py`
-
-Use Hugging Face's generic `Auto` classes to handle generic transformer backbones:
-
-```python
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
-MODEL_ID = "Qwen/Qwen2.5-1.5B"  # Target LLM Hugging Face ID
-
-# Initialize generic tokenizer
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-
-# CRITICAL FOR DECODER LLMs: Map EOS token as PAD token
-if tokenizer.pad_token is None:
-    tokenizer.pad_token = tokenizer.eos_token
-
-# Initialize model with sequence classification head
-model = AutoModelForSequenceClassification.from_pretrained(
-    MODEL_ID,
-    num_labels=len(mlb.classes_),
-    problem_type="multi_label_classification"
-)
-model.config.pad_token_id = tokenizer.pad_token_id
-
-```
-
-#### B. Apply Parameter-Efficient Fine-Tuning (PEFT / LoRA)
-
-For local GPUs with limited VRAM, attach **LoRA adapters** to train LLM classification heads without freezing hardware:
-
-```bash
-pip install peft
-
-```
+When training larger models (3B+ parameters) on local GPUs, enable **LoRA** to fine-tune adapter weights without running out of VRAM:
 
 ```python
 from peft import LoraConfig, get_peft_model, TaskType
@@ -228,13 +186,13 @@ peft_config = LoraConfig(
 )
 
 model = get_peft_model(model, peft_config)
-model.print_trainable_parameters()  # Trains < 1% of total parameters!
+model.print_trainable_parameters()
 
 ```
 
 ---
 
-## 📄 License & Attribution
+##  License & Attribution
 
 Data sourced from the **ZBW – Leibniz Information Centre for Economics**. Built using PyTorch, Hugging Face Transformers, and Scikit-Learn.
 
