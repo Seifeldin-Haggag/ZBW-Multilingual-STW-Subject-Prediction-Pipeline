@@ -6,13 +6,13 @@ This guide provides the exact terminal command sequence to run the entire projec
 
 ##  Prerequisites & Setup
 
-1. **Open your Terminal** and navigate to the project root directory:
+**Open your Terminal** and navigate to the project root directory:
    ```bash
    cd /Users/seifhany/Desktop/ZBW_multilingual_stw_nlp/zbw_proj_v05/multilingual-stw-nlp-main
 
 ```
 
-2. **Install Python Dependencies:**
+2.**Install Python Dependencies:**
 ```bash
 pip install -r requirements.txt
 
