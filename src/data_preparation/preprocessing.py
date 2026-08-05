@@ -17,7 +17,7 @@ VAL_FILE = os.path.join(OUTPUT_DIR, "val.json")
 ENCODER_PATH = os.path.join(OUTPUT_DIR, "label_encoder.pkl")
 
 def main():
-    print(f"Running Full-Vocabulary Preprocessor (Including Germany, USA, etc.) on: {RAW_DATA_PATH}")
+    print(f"Running Full-Vocabulary Preprocessor on: {RAW_DATA_PATH}")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
     if not os.path.exists(RAW_DATA_PATH):
@@ -61,7 +61,7 @@ def main():
     MIN_LABEL_FREQUENCY = 1  
     all_valid_names = set(label for label, count in label_counts.items() if count >= MIN_LABEL_FREQUENCY)
     
-    print(f"Unlocked ALL categories including countries/theories: {len(all_valid_names)} total target classes")
+    print(f"Unlocked ALL categories: {len(all_valid_names)} total target classes")
 
     final_texts = []
     final_labels = []
