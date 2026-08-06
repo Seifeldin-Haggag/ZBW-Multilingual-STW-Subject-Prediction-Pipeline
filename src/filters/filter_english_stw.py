@@ -10,7 +10,7 @@ WORDS_PATH = os.path.join(BASE_DIR, 'data/raw/stw-en.tsv')
 OUTPUT_PATH = os.path.join(BASE_DIR, 'data/filtered/english_stw_filtered.json')
 
 def load_json_data(file_path):
-    print(f"📖 Securely loading structural JSON array from: {file_path}")
+    print(f"Securely loading structural JSON array from: {file_path}")
     with open(file_path, 'r', encoding='utf-8') as file:
         return json.load(file)
 
@@ -19,7 +19,7 @@ def load_words(file_path):
     Parses your vocabulary file to build an optimized set of English subject names.
     """
     english_subject_names = set()
-    print(f"🧹 Extracting reference vocabulary terms from: {file_path}")
+    print(f"Extracting reference vocabulary terms from: {file_path}")
     
     with open(file_path, 'r', encoding='utf-8') as file:
         for line in file:
@@ -55,7 +55,7 @@ def main():
     raw_records = load_json_data(DATA_PATH)
 
     filtered_data = []
-    print("⏳ Commencing high-density record intersection matching...")
+    print("Commencing high-density record intersection matching...")
 
     for count, record in enumerate(raw_records, 1):
         subjects = record.get('subject', [])
