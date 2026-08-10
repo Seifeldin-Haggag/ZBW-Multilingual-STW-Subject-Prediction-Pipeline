@@ -105,10 +105,9 @@ def main():
                     "subject": clean_tags
                 })
 
-            # Safe capping threshold for target 167,000 records pool execution
-            if len(recovered_records) >= 167000:
-                print(f"Reached optimal target validation size ceiling of {len(recovered_records)} records.")
-                break
+            # Print progress every 100k lines so you know it's working
+            if idx > 0 and idx % 100000 == 0:
+                print(f"Processed {idx} TSV rows... Total valid records accumulated: {len(recovered_records)}")
 
     print(f"\nExtraction sequence finalized successfully!")
     print(f"Total parsed records written to asset pool array: {len(recovered_records)}")
